@@ -30,8 +30,10 @@ func TestServiceDispatchWorkflow(t *testing.T) {
 	dispatch := domain.DispatchRecord{
 		DispatchID:        "dispatch-1",
 		ProcessInstanceID: "proc-1",
+		NodeInstanceID:    "node-1",
 		NodeKey:           "serviceNode",
-		DispatchStatus:    domain.DispatchStatusPlaceholderDispatched,
+		TaskType:          "demo.echo",
+		DispatchStatus:    domain.DispatchStatusDispatched,
 		Payload:           payload,
 		CreatedAt:         time.Now(),
 	}
@@ -47,11 +49,11 @@ func TestServiceDispatchWorkflow(t *testing.T) {
 	if err := env.GetWorkflowResult(&result); err != nil {
 		t.Fatalf("read workflow result: %v", err)
 	}
-	if result.ResultStatus != domain.ResultStatusPlaceholderSuccess {
-		t.Fatalf("expected success result, got %s", result.ResultStatus)
+	if result.Status != domain.ResultStatusSucceeded {
+		t.Fatalf("expected success result, got %s", result.Status)
 	}
-	if result.ResultID != "dispatch-1:result" {
-		t.Fatalf("unexpected result ID: %s", result.ResultID)
+	if result.DispatchID != "dispatch-1" || result.NodeInstanceID != "node-1" {
+		t.Fatalf("unexpected result identity fields: %+v", result)
 	}
 	if result.Output["echoedMessage"] != "hello temporal" {
 		t.Fatalf("unexpected output: %+v", result.Output)

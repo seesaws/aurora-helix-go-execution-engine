@@ -11,14 +11,23 @@ import (
 )
 
 func ServiceDispatchWorkflow(ctx workflow.Context, dispatch domain.DispatchRecord) (domain.WorkerResult, error) {
+	timeout := 30 * time.Second
+	if dispatch.TimeoutSeconds > 0 {
+		timeout = time.Duration(dispatch.TimeoutSeconds) * time.Second
+	}
+	maxAttempts := int32(3)
+	if dispatch.Retry.MaxAttempts > 0 {
+		maxAttempts = int32(dispatch.Retry.MaxAttempts)
+	}
+
 	options := workflow.ActivityOptions{
 		TaskQueue:           queues.AgentExecutorTaskQueue,
-		StartToCloseTimeout: 30 * time.Second,
+		StartToCloseTimeout: timeout,
 		RetryPolicy: &temporal.RetryPolicy{
 			InitialInterval:    time.Second,
 			BackoffCoefficient: 2,
 			MaximumInterval:    10 * time.Second,
-			MaximumAttempts:    3,
+			MaximumAttempts:    maxAttempts,
 		},
 	}
 	ctx = workflow.WithActivityOptions(ctx, options)
@@ -26,18 +35,21 @@ func ServiceDispatchWorkflow(ctx workflow.Context, dispatch domain.DispatchRecor
 	var outcome domain.TaskExecutionOutcome
 	err := workflow.ExecuteActivity(ctx, activities.ExecuteTaskActivityName, dispatch).Get(ctx, &outcome)
 	result := domain.WorkerResult{
-		ResultID:          dispatch.DispatchID + ":result",
 		DispatchID:        dispatch.DispatchID,
 		ProcessInstanceID: dispatch.ProcessInstanceID,
+		NodeInstanceID:    dispatch.NodeInstanceID,
 		NodeKey:           dispatch.NodeKey,
-		ResultStatus:      outcome.ResultStatus,
-		ResultMessage:     outcome.ResultMessage,
+		Status:            outcome.Status,
+		Message:           outcome.Message,
 		Output:            outcome.Output,
-		CreatedAt:         workflow.Now(ctx),
+		CompletedAt:       workflow.Now(ctx),
+	}
+	if result.Status == "" {
+		result.Status = domain.ResultStatusSucceeded
 	}
 	if err != nil {
-		result.ResultStatus = domain.ResultStatusFailed
-		result.ResultMessage = err.Error()
+		result.Status = domain.ResultStatusFailed
+		result.Message = err.Error()
 		result.Output = nil
 	}
 	return result, nil

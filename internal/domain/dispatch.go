@@ -5,19 +5,36 @@ import (
 	"time"
 )
 
-const DispatchStatusPlaceholderDispatched = "PLACEHOLDER_DISPATCHED"
+const DispatchStatusDispatched = "DISPATCHED"
+
+type RetryPolicy struct {
+	MaxAttempts int    `json:"maxAttempts,omitempty"`
+	Backoff     string `json:"backoff,omitempty"`
+}
 
 type DispatchRecord struct {
 	DispatchID        string          `json:"dispatchId"`
 	ProcessInstanceID string          `json:"processInstanceId"`
+	NodeInstanceID    string          `json:"nodeInstanceId,omitempty"`
 	NodeKey           string          `json:"nodeKey"`
-	DispatchStatus    string          `json:"dispatchStatus"`
-	Payload           json.RawMessage `json:"payload"`
-	CreatedAt         time.Time       `json:"createdAt"`
+	TaskType          string          `json:"taskType"`
+	IdempotencyKey    string          `json:"idempotencyKey,omitempty"`
+	Input             map[string]any  `json:"input,omitempty"`
+	Metadata          map[string]any  `json:"metadata,omitempty"`
+	Retry             RetryPolicy     `json:"retry,omitempty"`
+	TimeoutSeconds    int             `json:"timeoutSeconds,omitempty"`
+	DispatchStatus    string          `json:"dispatchStatus,omitempty"`
+	Payload           json.RawMessage `json:"payload,omitempty"`
+	CreatedAt         time.Time       `json:"createdAt,omitempty"`
 }
 
 type TaskRequest struct {
-	TaskType string            `json:"taskType"`
-	Input    map[string]any    `json:"input"`
-	Metadata map[string]string `json:"metadata,omitempty"`
+	TaskType string         `json:"taskType"`
+	Input    map[string]any `json:"input"`
+	Metadata map[string]any `json:"metadata,omitempty"`
+}
+
+type DispatchAck struct {
+	DispatchID string `json:"dispatchId"`
+	Status     string `json:"status"`
 }

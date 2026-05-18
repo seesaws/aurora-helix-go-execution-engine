@@ -1,18 +1,26 @@
 package http
 
-import (
-	"github.com/aurora/aurora-helix-go-execution-engine/internal/domain"
-)
-
 type CreateDispatchRequest struct {
-	ProcessInstanceID string             `json:"processInstanceId"`
-	NodeKey           string             `json:"nodeKey"`
-	Payload           domain.TaskRequest `json:"payload"`
+	DispatchID        string         `json:"dispatchId"`
+	ProcessInstanceID string         `json:"processInstanceId"`
+	NodeInstanceID    string         `json:"nodeInstanceId"`
+	NodeKey           string         `json:"nodeKey"`
+	TaskType          string         `json:"taskType"`
+	IdempotencyKey    string         `json:"idempotencyKey"`
+	Input             map[string]any `json:"input"`
+	Metadata          map[string]any `json:"metadata"`
+	Retry             RetryRequest   `json:"retry"`
+	TimeoutSeconds    int            `json:"timeoutSeconds"`
+}
+
+type RetryRequest struct {
+	MaxAttempts int    `json:"maxAttempts"`
+	Backoff     string `json:"backoff"`
 }
 
 type CreateDispatchResponse struct {
-	Dispatch domain.DispatchRecord `json:"dispatch"`
-	Result   domain.WorkerResult   `json:"result"`
+	DispatchID string `json:"dispatchId"`
+	Status     string `json:"status"`
 }
 
 type HealthResponse struct {

@@ -48,30 +48,47 @@ func (s *Server) handleDispatch(w http.ResponseWriter, r *http.Request) {
 		s.writeError(w, http.StatusBadRequest, err)
 		return
 	}
-	if req.ProcessInstanceID == "" || req.NodeKey == "" || req.Payload.TaskType == "" {
-		s.writeError(w, http.StatusBadRequest, fmt.Errorf("processInstanceId, nodeKey, and payload.taskType are required"))
+	if req.ProcessInstanceID == "" || req.NodeInstanceID == "" || req.NodeKey == "" || req.TaskType == "" {
+		s.writeError(w, http.StatusBadRequest, fmt.Errorf("processInstanceId, nodeInstanceId, nodeKey, and taskType are required"))
 		return
 	}
-	payload, err := json.Marshal(req.Payload)
+	if req.DispatchID == "" {
+		req.DispatchID = s.idgen()
+	}
+	payload, err := json.Marshal(domain.TaskRequest{
+		TaskType: req.TaskType,
+		Input:    req.Input,
+		Metadata: req.Metadata,
+	})
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, err)
 		return
 	}
 	dispatch := domain.DispatchRecord{
-		DispatchID:        s.idgen(),
+		DispatchID:        req.DispatchID,
 		ProcessInstanceID: req.ProcessInstanceID,
+		NodeInstanceID:    req.NodeInstanceID,
 		NodeKey:           req.NodeKey,
-		DispatchStatus:    domain.DispatchStatusPlaceholderDispatched,
-		Payload:           payload,
-		CreatedAt:         s.now(),
+		TaskType:          req.TaskType,
+		IdempotencyKey:    req.IdempotencyKey,
+		Input:             req.Input,
+		Metadata:          req.Metadata,
+		Retry: domain.RetryPolicy{
+			MaxAttempts: req.Retry.MaxAttempts,
+			Backoff:     req.Retry.Backoff,
+		},
+		TimeoutSeconds: req.TimeoutSeconds,
+		DispatchStatus: domain.DispatchStatusDispatched,
+		Payload:        payload,
+		CreatedAt:      s.now(),
 	}
-	result, err := s.dispatcher.Dispatch(r.Context(), dispatch)
+	ack, err := s.dispatcher.Dispatch(r.Context(), dispatch)
 	if err != nil {
 		s.logger.Error("failed to process dispatch", "error", err)
 		s.writeError(w, http.StatusInternalServerError, err)
 		return
 	}
-	s.writeJSON(w, http.StatusOK, CreateDispatchResponse{Dispatch: dispatch, Result: result})
+	s.writeJSON(w, http.StatusOK, CreateDispatchResponse{DispatchID: ack.DispatchID, Status: ack.Status})
 }
 
 func (s *Server) handleResult(w http.ResponseWriter, r *http.Request) {

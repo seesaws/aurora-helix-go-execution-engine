@@ -3,23 +3,26 @@ package domain
 import "time"
 
 const (
-	ResultStatusPlaceholderSuccess = "PLACEHOLDER_SUCCESS"
-	ResultStatusFailed             = "FAILED"
+	ResultStatusRunning   = "RUNNING"
+	ResultStatusSucceeded = "SUCCEEDED"
+	ResultStatusFailed    = "FAILED"
+	ResultStatusTimeout   = "TIMEOUT"
+	ResultStatusCancelled = "CANCELLED"
 )
 
 type WorkerResult struct {
-	ResultID          string         `json:"resultId"`
 	DispatchID        string         `json:"dispatchId"`
 	ProcessInstanceID string         `json:"processInstanceId"`
+	NodeInstanceID    string         `json:"nodeInstanceId,omitempty"`
 	NodeKey           string         `json:"nodeKey"`
-	ResultStatus      string         `json:"resultStatus"`
-	ResultMessage     string         `json:"resultMessage"`
+	Status            string         `json:"status"`
+	Message           string         `json:"message,omitempty"`
 	Output            map[string]any `json:"output,omitempty"`
-	CreatedAt         time.Time      `json:"createdAt"`
+	CompletedAt       time.Time      `json:"completedAt,omitempty"`
 }
 
 type TaskExecutionOutcome struct {
-	ResultStatus  string         `json:"resultStatus"`
-	ResultMessage string         `json:"resultMessage"`
-	Output        map[string]any `json:"output,omitempty"`
+	Status  string         `json:"status"`
+	Message string         `json:"message"`
+	Output  map[string]any `json:"output,omitempty"`
 }
