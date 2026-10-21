@@ -20,7 +20,7 @@ pipeline {
 
     environment {
         CI = 'true'
-        APP_GIT_URL = 'git@github.com:seesaws/aurora-helix-go-execution-engine.git'
+        APP_GIT_URL = 'https://github.com/seesaws/aurora-helix-go-execution-engine.git'
         IMAGE_REPOSITORY = '192.168.0.31/aurora-helix-dev/aurora-go-execution'
         HARBOR_LOGIN_URL = 'http://192.168.0.31'
         HARBOR_CREDENTIALS_ID = 'd0278fbe-ed06-43e6-82d3-7c622f896195'
@@ -38,14 +38,13 @@ pipeline {
                     }
                     def remotes = scm.userRemoteConfigs
                     if (remotes.size() != 1 || remotes[0].url != env.APP_GIT_URL
-                            || !remotes[0].credentialsId) {
-                        error 'Configure this Pipeline-from-SCM job for the fixed Go SSH remote with a read credential'
+                            || remotes[0].credentialsId) {
+                        error 'Configure this Pipeline-from-SCM job for the fixed public Go HTTPS remote with credentials none'
                     }
                     checkout scmGit(
                         branches: [[name: params.SOURCE_REF]],
                         extensions: [[$class: 'CleanBeforeCheckout']],
-                        userRemoteConfigs: [[url: env.APP_GIT_URL,
-                            credentialsId: remotes[0].credentialsId]]
+                        userRemoteConfigs: [[url: env.APP_GIT_URL]]
                     )
                     env.SOURCE_COMMIT = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                     if (env.SOURCE_COMMIT != params.EXPECTED_COMMIT) {

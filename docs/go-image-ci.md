@@ -2,23 +2,31 @@
 
 The Go repository had no checked-in CI pipeline. The Java release Jenkinsfile
 has a Java-only service list and Maven build, so it cannot build this repository.
-The root `Jenkinsfile` adds a separate **dev image publication** pipeline. No job
-has been created or run by this change, and no source/image has been pushed.
+The root `Jenkinsfile` defines a separate **dev image publication** pipeline.
+The first operator build failed before loading it: SSH lacked the GitHub host
+key, and lightweight checkout interpreted the raw SHA as a branch. This revision
+uses the same public repository over HTTPS; no credential values or trust checks are
+changed to make checkout pass. This revision has not triggered a build or push.
 
 Configure a Pipeline-from-SCM job using the reviewed Go revision and script path
-`Jenkinsfile`, with the existing remote:
+`Jenkinsfile`, with this exact remote:
 
 ```text
-git@github.com:seesaws/aurora-helix-go-execution-engine.git
+https://github.com/seesaws/aurora-helix-go-execution-engine.git
 ```
 
-The pipeline reuses that job's single SCM credential reference and enforces the
-exact remote; it does not accept arbitrary repository URLs or credential IDs
-from build parameters. The Java job's SSH credential reference is
-`687e7a60-3502-45cd-bc95-ae478ec5f414`, used there for Codeup. Its authorization to
-this GitHub repository is **unverified**; select a credential with confirmed Go
-read access. Retain normal Jenkins SSH host-key verification. Do not read/export
-credential values or disable host-key checks to make checkout pass.
+Set SCM **Credentials: none**, Branch Specifier **`${SOURCE_REF}`** (the full
+reviewed SHA, without a `refs/heads/` prefix), and **Lightweight checkout: false**.
+This forces normal Git checkout for both loading the Jenkinsfile and the explicit
+source checkout. The operator verified anonymous HTTPS `git ls-remote` access;
+repository visibility was not changed. Normal HTTPS certificate validation stays
+enabled; no SSH host-key setting or credential is needed by this job.
+
+The pipeline requires one remote with exactly this HTTPS URL and no SCM
+credential, and its explicit checkout supplies only that URL. SSH, other URLs,
+additional remotes and attached SCM credentials are rejected. Repository URLs
+and credential IDs are not build parameters. Harbor publication still uses the
+existing, separately scoped registry credential below.
 
 Use an isolated Linux amd64 Jenkins worker with Docker CLI/daemon, Buildx, Git
 plugin (`scmGit`), Docker permissions and Credentials Binding. This job can run
@@ -66,7 +74,9 @@ runtime secret handling or deployment stage. Security/authentication filters and
 running local workflows remain untouched.
 
 Local validation passed Groovy compilation/AST parsing, four shell syntax checks,
-six SHA/mode guard cases and equality of the CI/Dockerfile builder pins. The
+six SHA/mode guard cases, eight SCM checkout cases, and equal CI/Dockerfile
+builder pins. Fixed HTTPS checkout omits credentials; SSH, arbitrary remotes,
+attached credentials and extra remotes are rejected before checkout. The
 pipeline was not executed. Validation remains static until a Jenkins
 validation/build record is provided separately; these checks do not prove
 Jenkins plugin availability, sandbox approval, GitHub checkout access, registry
