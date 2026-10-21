@@ -1,0 +1,15 @@
+{
+  "dispatchId": "d0038cd9-9251-4778-8e91-9175d9083b1e",
+  "tenantId": "test-ea1a50ea-8b30-4ba7-a740-cd54b86cd75e",
+  "executionGeneration": 1,
+  "processInstanceId": "29fc1e1e-8b2e-40c9-8f42-0d90f18a4844",
+  "nodeInstanceId": "4cc7407e-f272-426e-91b0-e00fddecca10",
+  "nodeKey": "echo",
+  "status": "SUCCEEDED",
+  "message": "echo completed",
+  "output": {
+    "echoedMessage": null,
+    "taskType": "system.echo"
+  },
+  "completedAt": "2026-10-21T01:30:38.807307Z"
+}

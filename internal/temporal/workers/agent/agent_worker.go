@@ -8,9 +8,10 @@ import (
 	"go.temporal.io/sdk/worker"
 )
 
-func Run(client client.Client, taskQueue string, registry ports.TaskExecutor) error {
+func Run(client client.Client, taskQueue string, registry ports.TaskExecutor, reporter *activities.CompletionReporter) error {
 	w := worker.New(client, taskQueue, worker.Options{})
 	executor := activities.NewAgentExecutor(registry)
 	w.RegisterActivityWithOptions(executor.ExecuteTask, activity.RegisterOptions{Name: activities.ExecuteTaskActivityName})
+	w.RegisterActivityWithOptions(reporter.DeliverResult, activity.RegisterOptions{Name: activities.DeliverResultActivityName})
 	return w.Run(worker.InterruptCh())
 }

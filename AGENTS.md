@@ -49,8 +49,8 @@ aurora-helix-go-execution-engine/
 - Keep HTTP ingress only in `event-worker`. Temporal workers do not serve HTTP.
 - Keep Temporal strings centralized. Queue names live in `internal/temporal/queues`; activity name lives in `internal/temporal/activities/names.go`.
 - Preserve camelCase JSON names: `processInstanceId`, `nodeKey`, `taskType`, `dispatchId`, `resultStatus`.
-- Runtime config is env-only via `internal/config/config.go`; visible vars are `PORT`, `TEMPORAL_HOST_PORT`, `TEMPORAL_NAMESPACE`.
-- Task types use dotted strings such as `demo.echo`.
+- Runtime config is env-only via `internal/config/config.go`; ingress uses `EXECUTION_SERVICE_TOKEN`, callback target `SOP_BASE_URL`, and callback `SOP_SERVICE_TOKEN` is resolved by the activity at execution time. Credentials never enter workflow input/history.
+- Production task types are allowlisted; currently only `system.echo`. `demo.*` and simulated RFQ are local demonstrations.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 - Do not add HTTP handlers to `service-worker` or `agent-executor`; HTTP belongs in `event-worker`.
@@ -62,7 +62,7 @@ aurora-helix-go-execution-engine/
 ## UNIQUE STYLES
 - Role split is explicit and part of the project model: event worker = ingress/client, service worker = workflow host, agent executor = activity host.
 - Workflow result IDs are derived as `<dispatchId>:result`.
-- Dispatch IDs are generated in HTTP as `dispatch-<unixnano>`.
+- Dispatch IDs are stable caller-supplied execution identities; semantic input changes on a reused ID return 409.
 - Tests are intentionally mixed: colocated workflow tests plus top-level HTTP integration tests.
 
 ## COMMANDS

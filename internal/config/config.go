@@ -3,6 +3,9 @@ package config
 import "os"
 
 type Config struct {
+	ServiceToken      string
+	SOPBaseURL        string
+	HTTPHost          string
 	HTTPPort          string
 	TemporalHostPort  string
 	TemporalNamespace string
@@ -22,6 +25,9 @@ func Load() Config {
 		temporalNamespace = "default"
 	}
 	return Config{
+		ServiceToken:      os.Getenv("EXECUTION_SERVICE_TOKEN"),
+		SOPBaseURL:        os.Getenv("SOP_BASE_URL"),
+		HTTPHost:          os.Getenv("HTTP_HOST"),
 		HTTPPort:          httpPort,
 		TemporalHostPort:  temporalHostPort,
 		TemporalNamespace: temporalNamespace,

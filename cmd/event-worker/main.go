@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -26,9 +27,9 @@ func main() {
 	defer tClient.Close()
 
 	dispatcher := app.NewTemporalDispatcher(tClient)
-	server := transporthttp.NewServer(logger, dispatcher)
+	server := transporthttp.NewServer(logger, dispatcher, cfg.ServiceToken)
 	httpServer := &http.Server{
-		Addr:              ":" + cfg.HTTPPort,
+		Addr:              net.JoinHostPort(cfg.HTTPHost, cfg.HTTPPort),
 		Handler:           server.Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}

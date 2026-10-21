@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-10-21T01:32:24.932557+00:00",
+  "ownedFixturePid": 66063,
+  "knownOwnedPidsExited": [
+    66063,
+    66116,
+    66117,
+    66118,
+    66119
+  ],
+  "listeners": {
+    "17233": "no listener; TCP connection refused",
+    "18095": "no listener; TCP connection refused"
+  },
+  "temporaryFixtureDirectoryRemoved": true,
+  "temporaryLaunchHelperRemoved": true,
+  "scope": "Only the locally owned wire fixture was stopped; no other service was changed."
+}

@@ -13,14 +13,14 @@ internal/transport/http/
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| Change routes | `server.go` | Current routes: `GET /healthz`, `POST /dispatches`, `GET /results/` |
+| Change routes | `server.go` | Current routes: public `GET /healthz`; machine-protected `POST /dispatches`, `GET /results/`, `POST /dispatches/{id}/cancel` |
 | Change request/response JSON | `dto.go` + `server.go` | Preserve domain-backed camelCase fields |
 | Change validation | `server.go` | Required fields are enforced in handler |
-| Change server-side ID generation | `server.go` | Dispatch IDs generated as `dispatch-<unixnano>` |
+| Change server-side ID generation | `server.go` | Dispatch IDs must be stable caller-supplied IDs |
 
 ## CONVENTIONS
 - Keep camelCase JSON fields aligned with current DTO/domain tags.
-- Keep `processInstanceId`, `nodeKey`, and `payload.taskType` as required fields unless the dispatch contract is intentionally redesigned.
+- Require the full M0 identity envelope and `system.echo` production task type; unknown fields and opaque payloads are rejected.
 - Keep this layer dependent on `app.Dispatcher`; it should not know workflow/activity internals.
 - Keep route wiring in `Handler()` and response writing through `writeJSON`/`writeError` helpers.
 
