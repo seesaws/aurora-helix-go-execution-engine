@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-10-21T03:49:14.702037+00:00",
+  "scope": "Owned isolated loopback Java/Go/real Temporal preflight; not dev deployment or external IAM",
+  "workflowCount": 4,
+  "workflows": [
+    {
+      "processInstanceId": "29635bdb-6bb7-4867-8595-b2f0c2432222",
+      "workflowId": "269ad227-b6d5-4ada-a8f2-3f1d708846e8",
+      "runId": "01a15c8a-3281-7c38-97a2-9b90fffd2672",
+      "status": "COMPLETED",
+      "historyEvents": 19,
+      "pendingActivities": 0,
+      "pendingChildren": 0,
+      "pendingWorkflowTask": false,
+      "scheduledActivities": [
+        "AgentExecutor.ExecuteTask",
+        "SOP.DeliverResult"
+      ],
+      "completedActivities": 2,
+      "closedAt": "2026-10-21T03:38:43.269002Z",
+      "taskResultStatus": "SUCCEEDED"
+    },
+    {
+      "processInstanceId": "f4b93495-85df-4837-ad4f-6d4bd34e3c1f",
+      "workflowId": "2d0a3936-ccda-47f9-afc8-5e41de3ebd4f",
+      "runId": "01a15c52-986f-7eb9-8b70-505b42a88656",
+      "status": "COMPLETED",
+      "historyEvents": 19,
+      "pendingActivities": 0,
+      "pendingChildren": 0,
+      "pendingWorkflowTask": false,
+      "scheduledActivities": [
+        "AgentExecutor.ExecuteTask",
+        "SOP.DeliverResult"
+      ],
+      "completedActivities": 2,
+      "closedAt": "2026-10-21T02:51:30.456597Z",
+      "taskResultStatus": "SUCCEEDED"
+    },
+    {
+      "processInstanceId": "9ce9e169-db1f-499c-a7ad-8b97d3f26eab",
+      "workflowId": "58f33c84-9748-475a-85c3-e825b0fa4a04",
+      "runId": "01a15c5e-2215-7a8f-ae68-e9e970ff3783",
+      "status": "COMPLETED",
+      "historyEvents": 19,
+      "pendingActivities": 0,
+      "pendingChildren": 0,
+      "pendingWorkflowTask": false,
+      "scheduledActivities": [
+        "AgentExecutor.ExecuteTask",
+        "SOP.DeliverResult"
+      ],
+      "completedActivities": 2,
+      "closedAt": "2026-10-21T02:50:35.481479Z",
+      "taskResultStatus": "SUCCEEDED"
+    },
+    {
+      "processInstanceId": "bada3460-7d36-4657-9eb8-728b0fd82b18",
+      "workflowId": "f5834fef-1226-4168-bc1b-a51ff9f87f24",
+      "runId": "01a15c8a-811b-7510-8a26-7a343573192a",
+      "status": "COMPLETED",
+      "historyEvents": 19,
+      "pendingActivities": 0,
+      "pendingChildren": 0,
+      "pendingWorkflowTask": false,
+      "scheduledActivities": [
+        "AgentExecutor.ExecuteTask",
+        "SOP.DeliverResult"
+      ],
+      "completedActivities": 2,
+      "closedAt": "2026-10-21T03:39:03.369519Z",
+      "taskResultStatus": "SUCCEEDED"
+    }
+  ],
+  "queues": {
+    "service-worker": {
+      "pollers": 1,
+      "approximateBacklogCount": 0,
+      "lastAccessTime": "2026-10-21T03:48:18.710273Z"
+    },
+    "agent-executor": {
+      "pollers": 1,
+      "approximateBacklogCount": 0,
+      "lastAccessTime": "2026-10-21T03:48:28.142588Z"
+    }
+  },
+  "health": {
+    "temporal": "SERVING",
+    "http": 200,
+    "unauthenticatedResult": 401,
+    "listenersLoopbackOnly": true
+  },
+  "backup": {
+    "method": "Python sqlite3 Connection.backup from read-only live source; fresh exclusive target",
+    "sha256": "9ad405b2d8b73fca68721aabc90d12993630444862fb36ce843a2c2b3476246a",
+    "bytes": 724992,
+    "mode": "0600",
+    "integrityCheck": "ok",
+    "tableCount": 48,
+    "previousBackupsUnchanged": true
+  },
+  "ownership": {
+    "allFourCommandsAndProcessGroupsMatched": true,
+    "processesRemainRunning": true,
+    "restartOrStopPerformed": false
+  },
+  "gitRemoteRead": {
+    "transport": "SSH; StrictHostKeyChecking=yes; BatchMode=yes",
+    "originHead": "10dda3eaa0722de1eb8bbbe1fbb4696b880091d3",
+    "result": "success on local host; Jenkins credential access remains unverified"
+  }
+}
