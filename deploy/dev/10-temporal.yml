@@ -1,0 +1,151 @@
+# REVIEW DRAFT: internal NetworkPolicy boundary; no TLS/auth; read README before applying.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aurora-temporal-dynamic-config
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal
+    app.kubernetes.io/part-of: aurora-sop-execution
+data:
+  config.yaml: "{}\n"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-temporal
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-temporal
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aurora-temporal
+        app.kubernetes.io/part-of: aurora-sop-execution
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      terminationGracePeriodSeconds: 90
+      containers:
+      - name: temporal
+        image: temporalio/server:1.32.0@sha256:c3e752127759616bb1615e0f9ba0e21635aeb5fdeb922de4f371c350955f46ae
+        env:
+        - name: DB
+          value: postgres12
+        - name: POSTGRES_SEEDS
+          value: postgresql.aurora.svc.cluster.local
+        - name: DB_PORT
+          value: '5432'
+        - name: DBNAME
+          value: aurora_temporal_dev
+        - name: VISIBILITY_DBNAME
+          value: aurora_temporal_visibility_dev
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: aurora-temporal-runtime
+              key: username
+        - name: POSTGRES_PWD
+          valueFrom:
+            secretKeyRef:
+              name: aurora-temporal-runtime
+              key: password
+        - name: BIND_ON_IP
+          value: 0.0.0.0
+        - name: TEMPORAL_BROADCAST_ADDRESS
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SQL_MAX_CONNS
+          value: '1'
+        - name: SQL_MAX_IDLE_CONNS
+          value: '1'
+        - name: SQL_VIS_MAX_CONNS
+          value: '1'
+        - name: SQL_VIS_MAX_IDLE_CONNS
+          value: '1'
+        - name: NUM_HISTORY_SHARDS
+          value: '4'
+        - name: ENABLE_ES
+          value: 'false'
+        - name: LOG_LEVEL
+          value: warn
+        - name: TEMPORAL_ALLOW_NO_AUTH
+          value: 'true'
+        - name: DYNAMIC_CONFIG_FILE_PATH
+          value: "/etc/temporal/dynamic/config.yaml"
+        ports:
+        - name: grpc
+          containerPort: 7233
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+            ephemeral-storage: 256Mi
+          limits:
+            cpu: '2'
+            memory: 2Gi
+            ephemeral-storage: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          tcpSocket:
+            port: grpc
+          periodSeconds: 5
+          failureThreshold: 60
+        readinessProbe:
+          grpc:
+            port: 7233
+            service: temporal.api.workflowservice.v1.WorkflowService
+          timeoutSeconds: 3
+          periodSeconds: 10
+        volumeMounts:
+        - name: tmp
+          mountPath: "/tmp"
+        - name: dynamic-config
+          mountPath: "/etc/temporal/dynamic"
+          readOnly: true
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: dynamic-config
+        configMap:
+          name: aurora-temporal-dynamic-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-temporal
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: aurora-temporal
+  ports:
+  - name: grpc
+    port: 7233
+    targetPort: grpc

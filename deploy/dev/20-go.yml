@@ -1,0 +1,275 @@
+# REVIEW DRAFT: replace Go image with immutable pushed digest; read README before applying.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-go-event-worker
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-event-worker
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-event-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aurora-go-event-worker
+        app.kubernetes.io/part-of: aurora-sop-execution
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: event-worker
+        image: 192.168.0.31/aurora-helix-dev/aurora-go-execution:REPLACE_WITH_IMMUTABLE_TAG
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/app/event-worker"
+        env:
+        - name: TEMPORAL_HOST_PORT
+          value: aurora-temporal.aurora-dev.svc.cluster.local:7233
+        - name: TEMPORAL_NAMESPACE
+          value: aurora-merchant-sop-dev
+        - name: HTTP_HOST
+          value: 0.0.0.0
+        - name: PORT
+          value: '8081'
+        - name: EXECUTION_SERVICE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: aurora-sop-execution-machine
+              key: execution-service-token
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - name: http
+          containerPort: 8081
+        readinessProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - worker
+            - event-worker
+          timeoutSeconds: 4
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: "/healthz"
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        startupProbe:
+          httpGet:
+            path: "/healthz"
+            port: http
+          periodSeconds: 5
+          failureThreshold: 24
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-go-event-worker
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-event-worker
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: aurora-go-event-worker
+  ports:
+  - name: http
+    port: 8081
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-go-service-worker
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-service-worker
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-service-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aurora-go-service-worker
+        app.kubernetes.io/part-of: aurora-sop-execution
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: service-worker
+        image: 192.168.0.31/aurora-helix-dev/aurora-go-execution:REPLACE_WITH_IMMUTABLE_TAG
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/app/service-worker"
+        env:
+        - name: TEMPORAL_HOST_PORT
+          value: aurora-temporal.aurora-dev.svc.cluster.local:7233
+        - name: TEMPORAL_NAMESPACE
+          value: aurora-merchant-sop-dev
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - worker
+            - service-worker
+          timeoutSeconds: 4
+          periodSeconds: 5
+          failureThreshold: 24
+        readinessProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - worker
+            - service-worker
+          timeoutSeconds: 4
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - process
+            - service-worker
+          timeoutSeconds: 2
+          periodSeconds: 15
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-go-agent-executor
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-agent-executor
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-agent-executor
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aurora-go-agent-executor
+        app.kubernetes.io/part-of: aurora-sop-execution
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      containers:
+      - name: agent-executor
+        image: 192.168.0.31/aurora-helix-dev/aurora-go-execution:REPLACE_WITH_IMMUTABLE_TAG
+        imagePullPolicy: IfNotPresent
+        command:
+        - "/app/agent-executor"
+        env:
+        - name: TEMPORAL_HOST_PORT
+          value: aurora-temporal.aurora-dev.svc.cluster.local:7233
+        - name: TEMPORAL_NAMESPACE
+          value: aurora-merchant-sop-dev
+        - name: SOP_BASE_URL
+          value: http://aurora-sop-service.aurora-dev.svc.cluster.local:8080/sop
+        - name: SOP_SERVICE_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: aurora-sop-execution-machine
+              key: sop-callback-token
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+            ephemeral-storage: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - worker
+            - agent-executor
+          timeoutSeconds: 4
+          periodSeconds: 5
+          failureThreshold: 24
+        readinessProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - worker
+            - agent-executor
+          timeoutSeconds: 4
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - "/app/health-probe"
+            - process
+            - agent-executor
+          timeoutSeconds: 2
+          periodSeconds: 15

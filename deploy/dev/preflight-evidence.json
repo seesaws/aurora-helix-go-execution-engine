@@ -1,0 +1,165 @@
+{
+  "postgres": "18.4-alpine",
+  "temporal": "1.32.0",
+  "isolatedDatabases": 2,
+  "schemaJobScript": "passed with actual admin-tools",
+  "readOnlyNonRootServer": true,
+  "grpcHealth": "SERVING",
+  "namespaceRetention": "7d",
+  "sqlMaxConnsPerStore": 1,
+  "sqlMaxIdleConnsPerStore": 1,
+  "observedConnectionSamples": [
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    },
+    {
+      "total": 8,
+      "active": 0,
+      "idle": 8,
+      "byDatabase": {
+        "aurora_temporal_dev": 4,
+        "aurora_temporal_visibility_dev": 4
+      }
+    }
+  ],
+  "workflow": "legacy ServiceDispatchWorkflow completed against real SQL Temporal; no callback stub",
+  "scope": "private local Docker network, no published ports; not a dev deployment or NetworkPolicy test",
+  "goImage": {
+    "localOnly": true,
+    "digest": "sha256:912da1a0527bbe8593e30b5fc9e6ad7c7fc09cf85f913eacafcefbbb5833bcf7",
+    "architecture": "amd64",
+    "os": "linux",
+    "user": "65532:65532",
+    "sizeBytes": 23893760,
+    "created": "1970-01-01T00:00:00Z",
+    "independentNoCacheBuilds": 2,
+    "identicalDigest": true,
+    "readOnlyNetworkNoneProcessProbe": "passed"
+  },
+  "postgresImage": "postgres@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15",
+  "validation": {
+    "unit": "22 tests passed, 19 packages",
+    "race": "all packages passed",
+    "yamlClientDryRun": "17 resources validated against CA-verified dev API schema; client dry-run only",
+    "networkPolicies": 8,
+    "secretResources": 0
+  },
+  "cleanup": {
+    "sqlCheckContainersRemoved": true,
+    "sqlCheckNetworkRemoved": true,
+    "temporarySQLCredentialFilesRemoved": true,
+    "loopbackJavaGoFixture": "retained for parent acceptance; ownership in private processes.json"
+  },
+  "boundaries": [
+    "No push, live database/Secret creation, GitOps edit or cluster resource mutation",
+    "Workflow probe used retained legacy unscoped branch; it does not verify authenticated Java callback",
+    "NetworkPolicy enforcement and real dev existing-object acceptance are not covered by local checks"
+  ],
+  "loopbackJavaCallbackRecovery": {
+    "dispatchId": "2d0a3936-ccda-47f9-afc8-5e41de3ebd4f",
+    "processInstanceId": "f4b93495-85df-4837-ad4f-6d4bd34e3c1f",
+    "temporalRunId": "01a15c52-986f-7eb9-8b70-505b42a88656",
+    "priorFailure": "actual Java HTTP401",
+    "afterJavaFix": "natural durable activity retry 11 succeeded",
+    "closedAt": "2026-10-21T02:51:30.456597Z",
+    "workflowStatus": "COMPLETED",
+    "administrativeResetOrProcessRestart": false,
+    "scope": "actual isolated Java/Go/Temporal; not dev acceptance or external machine IAM"
+  }
+}

@@ -1,0 +1,291 @@
+# REVIEW DRAFT: do not apply before README prerequisites. No Secret values are included.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-sop-execution-deny-default
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-sop-execution-deny-default
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: aurora-sop-execution
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress: []
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-sop-execution-dns
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-sop-execution-dns
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: aurora-sop-execution
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-go-event-worker
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-event-worker
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-event-worker
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-sop-service
+    ports:
+    - protocol: TCP
+      port: 8081
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-go-service-worker
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-service-worker
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-service-worker
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-go-agent-executor
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-go-agent-executor
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-go-agent-executor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-sop-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-temporal
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-temporal
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-go-event-worker
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-go-service-worker
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-go-agent-executor
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal-namespace
+    ports:
+    - protocol: TCP
+      port: 7233
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233
+    - protocol: TCP
+      port: 7234
+    - protocol: TCP
+      port: 7235
+    - protocol: TCP
+      port: 7239
+    - protocol: TCP
+      port: 6933
+    - protocol: TCP
+      port: 6934
+    - protocol: TCP
+      port: 6935
+    - protocol: TCP
+      port: 6939
+    - protocol: UDP
+      port: 6933
+    - protocol: UDP
+      port: 6934
+    - protocol: UDP
+      port: 6935
+    - protocol: UDP
+      port: 6939
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: aurora
+      podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233
+    - protocol: TCP
+      port: 7234
+    - protocol: TCP
+      port: 7235
+    - protocol: TCP
+      port: 7239
+    - protocol: TCP
+      port: 6933
+    - protocol: TCP
+      port: 6934
+    - protocol: TCP
+      port: 6935
+    - protocol: TCP
+      port: 6939
+    - protocol: UDP
+      port: 6933
+    - protocol: UDP
+      port: 6934
+    - protocol: UDP
+      port: 6935
+    - protocol: UDP
+      port: 6939
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-temporal-schema
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal-schema
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-temporal-schema
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: aurora
+      podSelector:
+        matchLabels:
+          app: postgresql
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aurora-temporal-namespace
+  namespace: aurora-dev
+  labels:
+    app.kubernetes.io/name: aurora-temporal-namespace
+    app.kubernetes.io/part-of: aurora-sop-execution
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: aurora-temporal-namespace
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress: []
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: aurora-temporal
+    ports:
+    - protocol: TCP
+      port: 7233

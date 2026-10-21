@@ -143,3 +143,11 @@ the workers, verify one execution and restored delivery, and verify completed
 replay/conflict, cancellation, timeout and replay of an unmarked scaffold history. This is distinct from Temporal's
 in-process `WorkflowTestSuite`; it is still a local callback HTTP substitute,
 not Java/Go deployed integration. See [implementation evidence](docs/merchant-sop-execution.md).
+
+## Container and dev deployment draft
+
+[deploy/dev/README.md](deploy/dev/README.md) describes the pinned amd64 non-root
+image, executable health probes, dedicated SQL-backed Temporal deployment draft
+and its internal NetworkPolicy boundary. These artifacts require operator
+integration and have not been deployed. The isolated loopback runner lives in
+[manualqa/merchantv2](manualqa/merchantv2/README.md).
